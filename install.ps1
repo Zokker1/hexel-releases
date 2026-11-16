@@ -63,9 +63,12 @@ try {
     }
 
     $TargetExe = Join-Path $InstallDir "hexel.exe"
+    Get-ChildItem -Path $InstallDir -Filter "hexel.exe*.old" -ErrorAction SilentlyContinue | ForEach-Object {
+        Remove-Item -Path $_.FullName -Force -ErrorAction SilentlyContinue
+    }
     $BackupExe = "$TargetExe.old"
     if (Test-Path $BackupExe) {
-        Remove-Item -Path $BackupExe -Force -ErrorAction SilentlyContinue
+        $BackupExe = "$TargetExe.$PID.$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()).old"
     }
     if (Test-Path $TargetExe) {
         try {
