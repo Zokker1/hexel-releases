@@ -63,7 +63,21 @@ try {
     }
 
     $TargetExe = Join-Path $InstallDir "hexel.exe"
-    Copy-Item -Path $BuiltExe -Destination $TargetExe -Force
+    $BackupExe = "$TargetExe.old"
+    if (Test-Path $BackupExe) {
+        Remove-Item -Path $BackupExe -Force -ErrorAction SilentlyContinue
+    }
+    if (Test-Path $TargetExe) {
+        try {
+            Copy-Item -Path $BuiltExe -Destination $TargetExe -Force
+        } catch {
+            Move-Item -Path $TargetExe -Destination $BackupExe -Force
+            Copy-Item -Path $BuiltExe -Destination $TargetExe -Force
+            Remove-Item -Path $BackupExe -Force -ErrorAction SilentlyContinue
+        }
+    } else {
+        Copy-Item -Path $BuiltExe -Destination $TargetExe -Force
+    }
     Unblock-File -Path $TargetExe -ErrorAction SilentlyContinue
     Write-Host "Installed: $TargetExe"
 
